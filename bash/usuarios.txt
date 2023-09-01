@@ -1,0 +1,15 @@
+root
+oracle
+gmdadmin
+gmdmnt
+gmdbkp
+gmdope
+gmdjrodr
+gmdjtorr
+gmdrgara
+cnvcecom
+cnvmnt
+cnvadmin
+cnvjmar
+cnvbkp
+gmdhmele

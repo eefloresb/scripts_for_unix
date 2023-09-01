@@ -1,0 +1,55 @@
+User root may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+User oracle may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+User gmdadmin may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+    (ALL) NOPASSWD: ALL
+User gmdmnt may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+User gmdbkp may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+User gmdope may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+User gmdjrodr may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+    (ALL) NOPASSWD: ALL
+User gmdjtorr may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+    (ALL) NOPASSWD: ALL
+User gmdcsalv may run the following commands on aasal2:
+User gmddmeji may run the following commands on aasal2:
+User gmdfgonz may run the following commands on aasal2:
+User gmdgcuev may run the following commands on aasal2:
+User gmdjcast may run the following commands on aasal2:
+User gmdkzena may run the following commands on aasal2:
+User gmdlpico may run the following commands on aasal2:
+User gmdlbarr may run the following commands on aasal2:
+User gmdlvald may run the following commands on aasal2:
+User gmdsrami may run the following commands on aasal2:
+User gmdvarru may run the following commands on aasal2:
+User gmdvhuam may run the following commands on aasal2:
+User gmdmleon may run the following commands on aasal2:
+User gmdjpaz may run the following commands on aasal2:
+User gmdwrequ may run the following commands on aasal2:
+User gmdvjara may run the following commands on aasal2:
+User gmdmordi may run the following commands on aasal2:
+User gmdwgara may run the following commands on aasal2:
+User gmdclnt may run the following commands on aasal2:
+User gmdrgara may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+    (ALL) NOPASSWD: ALL
+User cnvcecom may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+User cnvmnt may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+User cnvadmin may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+User cnvjmar may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+    (ALL) NOPASSWD: ALL
+User cnvbkp may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+User gmdhmele may run the following commands on aasal2:
+    (ALL) NOPASSWD: ALL
+    (ALL) NOPASSWD: ALL

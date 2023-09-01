@@ -1,0 +1,55 @@
+#!/bin/bash
+#Autor:eflores@canvia.com
+#License: gplv2
+
+DIRECTORY="/opt/wildfly/standalone/configuration"
+TEMP="/tmp/result_status_widfly.txt"
+FILESTAND="standalone.xml"
+
+function _check_service_wildfly(){
+  echo "status in $(date +%y-%m-%d)" > $TEMP
+  echo "#########################" >> $TEMP
+  service --status-all | grep wildfly >> $TEMP
+  echo "#########################" >> $TEMP
+}
+
+function _restart_wildfly(){
+  sudo service wildfly restart
+}
+
+function _backup_file(){
+cd $DIRECTORY
+  cp -rfv $FILESTAND $FILESTAND.$(date +%y-%m-%d).bkp 
+}
+
+function _sed_file(){
+if grep "enable-http2" $FILESTAND; then 
+sed -ir /https-listener/s/enable\-http2=\"true\"/enabled-protocols=\"TLSv1.2\"\ enable\-http2=\"true\"/g $FILESTAND
+else
+ sed -rie s/ssl\ protocol\=\"TLSV1.1/ssl\ protocol\=\"TLSV1.2/g $FILESTAND
+ sed -rie /https-listener/s/enabled-protocols=\"TLSv1.1\,.*\"/enabled-protocols=\"TLSv1.2\"/g $FILESTAND
+fi
+}
+
+function _validate_wildfly(){
+echo ""
+echo "################### RESULT ##################" >> $TEMP
+echo "/subsystem=undertow/server=default-server/https-listener=https:read-attribute(name=enabled-protocols)" | /opt/wildfly/bin/jboss-cli.sh -c >> /tmp/result_status_widfly.txt
+}
+
+function _show_wildfly(){
+  cat /tmp/result_status_widfly.txt
+}
+
+if grep https-listener $DIRECTORY/standalone.xml; then 
+_check_service_wildfly
+_backup_file
+_sed_file
+_restart_wildfly
+sleep 180
+_check_service_wildfly
+_validate_wildfly
+_show_wildfly
+else
+  echo "value https-listener is not defined"
+fi

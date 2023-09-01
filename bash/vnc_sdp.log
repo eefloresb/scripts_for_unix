@@ -1,0 +1,8 @@
+#!/bin/bash
+RUTA="/root/.vnc"
+
+if [[ -d /root/.vnc ]]; then
+  for i in $(ls -C1 *.log); do
+    cat /dev/null > $i
+  done
+fi

@@ -1,0 +1,42 @@
+BEGIN{
+  print "id,name,mdisk_grp_name,capacity,vdisk_UID,function,protocol"
+}
+{
+  if($10 ~ "6005.*")
+   if($7" "$8 ~ "Pool Flash")
+    print $1","$2","$7" "$8","$9","$10","$23","$24
+   else 
+   #id | name lun | type pool | capacity | LunID | name Lun | type disk
+   #452;DC2_V9000_LPCLEARPASS02_P01;PoolV7000G2C1;1.15TB;600507680C810608700000000000023A DC2_V9000_LPCLEARPASS02_P01
+    print $1","$2","$7","$8","$10","$22","$23
+  else
+    if ($12 ~ "6005.*")
+       if($7" "$8 ~ "Pool Flash")
+        print $1","$2","$7" "$8","$9","$12","$25","$26
+       else 
+       #id | name lun | type pool | capacity | LunID | name Lun | type disk
+       #300;DC2_V9000_ZEUSPROD_VGDATA_P022;PoolV7000G2C1;300.00GB;600507680C810608700000000000045A DC2_V9000_ZEUSPROD_VGDATA_P022 aux
+        print $1","$2","$7","$8","$12","$24","$25
+    else
+      if($11 ~ "6005.*")
+        if($7" "$8 ~ "Pool Flash")
+          #id | name lun | type pool | capacity | LunID | name Lun | type disk
+          #417,DC2_V9000_EPSFINAPPRD01_ROOTVG_P01,Pool Flash,60.00GB,600507680C81060870000000000001E7,DC2_V9000_EPSFINAPPRD01_ROOTVG_P01,aux
+          print $1","$2","$7" "$8","$9","$11","$24","$25
+        else 
+          #id | name lun | type pool | capacity | LunID | name Lun | type disk
+          #4,DC2_V700G2_PRUEBA_01,Pool_Easy Tier,10.00GB,6005076400820273C0000000000001F9,DC2_V700G2_PRUEBA_01,scsi
+          if($7" "$8 ~ "Pool_Easy Tier")
+            print $1","$2","$7" "$8","$9","$11","$24","$25
+          else 
+            print $1","$2","$7","$8","$11","$23","$24
+      else
+        if($13 ~ "6005.*")
+          if($7" "$8 ~ "Pool Flash")
+            #id | name lun | type pool | capacity | LunID | name Lun | type disk
+            #416;DC2_V9000_EPSFINAPPRD01_SWAP_P01;Pool Flash 30.00GB 600507680C81060870000000000001E6  DC2_V9000_EPSFINAPPRD01_SWAP_P01 aux
+            print $1","$2","$7" "$8","$9","$13","$26","$27
+          else
+            print $1","$2","$7","$8","$13","$25","$26
+}
+

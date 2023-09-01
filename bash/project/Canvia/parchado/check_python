@@ -1,0 +1,10 @@
+#!/bin/bash
+if which ptyhon &>/dev/null; then 
+    version=$(python --version|grep -Ewo "([[:digit:]]+\.?)+")
+    echo $version
+elif which python3 &>/dev/null; then     
+    version=$(python3 --version|grep -Ewo "([[:digit:]]+\.?)+")
+    echo $version
+else
+    return 99
+fi

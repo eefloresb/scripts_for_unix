@@ -1,0 +1,38 @@
+#!/bin/bash 
+#where "1" is a partition format /dev/dm5 is report google in remedy
+
+###### code ###
+###!/bin/bash
+#
+## Declare a 3x3 matrix
+#declare -A matrix
+#num_rows=3
+#num_cols=3
+#
+## Fill the matrix with some values
+#for ((i=0; i<num_rows; i++)); do
+#    for ((j=0; j<num_cols; j++)); do
+#        matrix[$i,$j]=$((i * j))
+#    done
+#done
+#
+## Print the matrix
+#for ((i=0; i<num_rows; i++)); do
+#    for ((j=0; j<num_cols; j++)); do
+#        printf "%s\t" "${matrix[$i,$j]}"
+#    done
+#    echo
+#done
+
+_check_blikd(){
+xPartition=$1
+declare -a vector 
+declare -i i=0
+declare -i j=0
+xMypartionUUID=$(sudo blkid xPartition)
+lsblk | grep -wo sd[a-z]* | while read line; do 
+    vector[$i]=$line 
+done
+}
+
+_check_blikd $1 

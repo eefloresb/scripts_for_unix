@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+    rundeck:
+        image: rundeck/rundeck:4.3.1
+        links:
+          - mysql
+        environment:
+            RUNDECK_DATABASE_DRIVER: org.mariadb.jdbc.Driver
+            RUNDECK_DATABASE_USERNAME: rundeck
+            RUNDECK_DATABASE_PASSWORD: rundeck
+            RUNDECK_DATABASE_URL: jdbc:mysql://mysql/rundeck?autoReconnect=true&useSSL=false
+            RUNDECK_GRAILS_URL: localhost:4440
+        volumes:
+          - "/etc/timezone:/etc/timezone:ro"
+          - "/etc/localtime:/etc/localtime:ro"
+        ports:
+          - 4440:4440
+    nginx:
+        image: nginx
+        links:
+          - rundeck
+        volumes:
+          - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        ports:
+          - 80:80
+    mysql:
+        image: mysql:5.7
+        expose:
+          - 3306
+        environment:
+          - MYSQL_ROOT_PASSWORD=root
+          - MYSQL_DATABASE=rundeck
+          - MYSQL_USER=rundeck
+          - MYSQL_PASSWORD=rundeck
+        volumes:
+          - dbdata:/var/lib/mysql
+
+volumes:
+    dbdata:
+    data:

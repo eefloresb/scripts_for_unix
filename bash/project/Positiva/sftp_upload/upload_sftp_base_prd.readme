@@ -1,0 +1,236 @@
+#!/bin/bash
+## Autor: eflores@canvia.com
+## Licencia: gplv2
+## /tmp/Solicitud_20100210909_20221207_01.txt
+### SOPORTE DESARROLLO ###
+## file1.TXT
+## file2.TXT
+## file3.TXT
+## /tmp/Solicitud_20100210909_20221207_01.txt
+## /tmp/Solicitud_20100210909_20221207_02.txt
+## /tmp/Solicitud_20100210909_20221207_03.txt
+
+# Valores ha ser cambiados de acuerdo al entorno productivo
+#USER_LOG: Usuario del entorno ( prd - qa -dev ) ejemplo
+# prdadm ==> prd 
+# qaadm ==> qa 
+# devadm ==> dev
+#REMOTE_IP_DESTINO: sftp interno para cada entorno
+
+# Este es un script en bash que se encarga de copiar archivos desde una carpeta local a un servidor remoto mediante SSH.
+# Las variables que se definen en el inicio del script incluyen el usuario y la IP del servidor remoto, 
+# la ruta de la carpeta local, la ruta de la carpeta remota y las rutas de los archivos de registro.
+
+#Usuario de sap en el entorno productivo
+# La variable USER_LOG indica el usuario del entorno (prd - qa -dev), mientras que la variable USER indica el usuario del  
+# SFTP interno el cual se almacena los archivos a copiar (Solicitud_20100210909_201905_09.txt).
+USER_LOG="prdadm"
+USER="sap_sftp"
+# La variable COPY se utiliza para indicar que se está realizando una copia de archivos, mientras que la variable STATUS 
+# indica el estado de la transferencia (OK o FAILED).
+COPY="copy"
+STATUS="OK"
+# La variable OS guarda el nombre del sistema operativo, DAY guarda el día actual y 
+# MAYMONTH guarda el día y mes actual en formato DDMM.
+OS=$uname
+DAY=$(date +%d)
+mAYMONTH=$(date +%d%m)
+# REMOTE_IP_DESTINO indica la dirección IP del servidor remoto, y se pueden utilizar dos opciones (10.10.30.161 o 192.168.56.14).
+REMOTE_IP_DESTINO="10.10.30.161"
+#REMOTE_IP_DESTINO="192.168.56.14"
+# BACKUPLOG es la ruta y nombre del archivo de log donde se registran las copias de archivos, con el usuario de sap que ejecuta el script
+BACKUPLOG="/var/log/sapsftp/logsapcopyremote.log"
+# REMOTECOPYLOG es la ruta y nombre del archivo de log donde se registran los estados de la copia de archivos en el servidor remoto.
+REMOTECOPYLOG="/var/log/sapsftp/copyremotestatus.log"
+# RUTA_DIR_ORIGEN es la ruta de la carpeta local donde se encuentran los archivos a copiar.
+RUTA_DIR_ORIGEN="/tmp"
+#RUTA_DIR_DESTINO="/FTP"
+# RUTA_DIR_DESTINO es la ruta de la carpeta remota donde se deben copiar los archivos.
+RUTA_DIR_DESTINO="/Nexus"
+#KEY="/home/sap_sftp/.ssh/id_rsa"
+#KEY="/SAPDOCS/APP1/SPLA/SPLA_EG/.ssh/id_rsa"
+# KEY es la ruta y nombre del archivo de clave SSH para la conexión al servidor remoto.
+KEY="/keys/id_rsa"
+DATE=$(date "+%y-%m-%d %H:%M")
+
+_create_logs(){
+# Verifica si existe el directorio /var/log/sapsftp sino lo crea
+if [[ ! -d ${BACKUPLOG%/*.log/} ]]; then 
+  mkdir -p ${BACKUPLOG%/*.log/}
+  chown ${USER_LOG}:sapsys ${BACKUPLOG%/*.log/}
+  chmod 775 ${BACKUPLOG%/*.log/}
+fi 
+# Por último, se verifica si los archivos de log existen. Si no existen, se crean con los permisos correspondientes.
+if [[ ! -f $BACKUPLOG ]];then
+  touch $BACKUPLOG
+  chown -R ${USER_LOG}:sapsys ${BACKUPLOG}
+  chmod -R 775 ${BACKUPLOG}
+fi
+if [[ ! -f $REMOTECOPYLOG ]];then
+  touch $REMOTECOPYLOG
+  chown -R ${USER_LOG}:sapsys ${REMOTECOPYLOG}
+  chmod -R 775 ${REMOTECOPYLOG}
+fi
+}
+
+# La función _upload_data() se utiliza para buscar y listar todos los archivos que se encuentran en la carpeta local 
+# y que tienen un patrón específico. La función _generate_file_random() genera un archivo temporal que almacena los 
+# archivos encontrados en la carpeta local.
+_upload_data(){
+local LOGTMP=$1
+#### el para
+find * -name "Solicitud_*.txt" -prune -type f > $LOGTMP
+}
+
+# El código define una función llamada _generate_file_random() que tiene como objetivo generar un nombre de archivo 
+# aleatorio en la carpeta /tmp/temp. Para ello, utiliza el comando od para obtener un número aleatorio de 4 bytes 
+# a partir del dispositivo /dev/random, y lo almacena en la variable RAND. Luego, se define el nombre 
+# del archivo en la variable tmpfile, concatenando "/tmp/temp." con el valor aleatorio generado previamente. 
+# Posteriormente, se crea el archivo en la ruta definida con el comando touch. 
+# Finalmente, se invoca la función _upload_data() con el archivo creado como parámetro, 
+# y se rellena con la información de la busqueda para el archivo/s Solicitud_20100210909_201905_09.txt que existen.
+_generate_file_random(){
+RAND=$(od -N 4 -tu /dev/random | awk 'NR==1 {print $2}')
+tmpfile=/tmp/temp.${RAND}
+touch $tmpfile
+_upload_data $tmpfile
+echo $tmpfile
+}
+
+# Además, el código también define una función llamada _get_data() que utiliza la función _generate_file_random() 
+# para generar un archivo aleatorio y devuelve su nombre. Este archivo se utiliza como registro temporal 
+# de los archivos que se van copiando en la función _set_copy().
+_get_data(){
+local LOGTMP=$(_generate_file_random)
+echo $LOGTMP
+}
+
+# La función _copy_remote() se encarga de realizar la copia del archivo al servidor remoto mediante SSH. Si la copia tiene éxito,
+# se registra en el archivo de registro BACKUPLOG, junto con la fecha y el estado "OK". Si la copia falla, 
+# se registra en el mismo archivo de registro, pero con el estado "FAILED". 
+# Si el archivo ya se ha copiado previamente y ha fallado, se intenta nuevamente.
+
+#La función _copy_remote se encarga de realizar la copia del archivo $xFILE a un servidor remoto mediante SFTP utilizando la herramienta rsync.
+_copy_remote(){
+# La función recibe dos parámetros: $xFILE, que es el archivo que se va a copiar, 
+# y $BAND, que indica si la copia anterior falló (FAILED) o no (OK).
+  local xFILE=$1
+  local BAND=$2
+# En las siguientes variables se almacena el desgloce del nombre del archivo a copiar
+# por ejemplo para este caso tomamos Solicitud_20100210909_20221207_03.txt donde 
+# xSTAT es el tipo de estado: "Solicitud"
+  local xSTAT=$(echo ${xFILE}|awk -F "_" '{print $1}')
+# xRUC es el RUC: "20100210909"
+  local xRUC=$(echo ${xFILE}|awk -F "_" '{print $2}')
+# xDATE es la fecha/mes/dia : "20221207"
+  local xDATE=$(echo ${xFILE}|awk -F "_" '{print $3}')
+  # El comando awk -v ORS="" '{ gsub(/./,"&\n") ; print }' se utiliza para insertar un salto de línea después de cada carácter en una cadena de texto.
+  # Explicación:
+  # awk: es un lenguaje de programación de texto utilizado para procesar y transformar archivos de texto.
+  # -v ORS="": se utiliza para establecer la variable ORS (output record separator) como una cadena vacía. 
+  # Esto significa que no se agregará ningún carácter después de cada línea impresa.
+  # '{ gsub(/./,"&\n") ; print }': este es el comando awk en sí. La función gsub se utiliza para reemplazar cada carácter en la cadena de entrada ($xDATE) 
+  # con el mismo carácter seguido de un salto de línea (&\n), como ejemplo tomamos xDATE con valor 20221207 entonces gsub aplica lo siguiente en dicho valor
+  # toma cada caracter 20221207 y lo procesa de la siguiente forma
+  # 2
+  # 0
+  # 2
+  # 2 
+  # 1
+  # 2
+  # 0 
+  # 7
+  # Luego, la función print se utiliza para imprimir la cadena resultante con los saltos de línea adicionales. 
+
+  # En resumen, este comando inserta un salto de línea después de cada carácter en una cadena de texto.
+  local value=($(echo $xDATE|awk -v ORS="" '{ gsub(/./,"&\n") ; print }'))
+  # El código toma la variable value, que es un arreglo que contiene cada uno de los caracteres del valor de xDATE,
+  # y luego utiliza indices para seleccionar los primeros cuatro elementos y los dos siguientes, 
+  # correspondientes al año y mes respectivamente. Luego, los concatena en variables distintas xYEAR y xMONTH, 
+  # que se utilizan más adelante para construir la ruta de destino donde se copiará el archivo remoto.
+  local xYEAR=${value[0]}${value[1]}${value[2]}${value[3]}
+  local xMONTH=${value[4]}${value[5]}
+  local xITEM=$(echo ${xFILE}|awk -F "_" '{print $4}')
+# Se establece una conexión SFTP con el servidor remoto mediante la herramienta ssh. 
+# Se crea una carpeta en la ruta definida en la variable $RUTA_DIR_DESTINO 
+# si esta no existe, y se establece la variable $RUTA_DIR_DESTINO con la ruta donde se copiará el archivo.
+         ssh -f $USER@${REMOTE_IP_DESTINO} -i ${KEY} -q -n -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes -o PasswordAuthentication=no "if [[ ! -d ${RUTA_DIR_DESTINO}/$xSTAT/$xRUC/$xYEAR/$xMONTH ]]; then mkdir -p ${RUTA_DIR_DESTINO}/$xSTAT/$xRUC/$xYEAR/$xMONTH; fi"
+  local RUTA_DIR_DESTINO="${RUTA_DIR_DESTINO}/$xSTAT/$xRUC/$xYEAR/$xMONTH"
+# A continuación, se utiliza la herramienta rsync para copiar el archivo al servidor remoto, 
+# y se redirige la salida a un archivo de log definido en la variable $REMOTECOPYLOG. 
+        rsync -Pav -e "ssh -l $USER -i $KEY" $xFILE $USER@${REMOTE_IP_DESTINO}:${RUTA_DIR_DESTINO}/ 1>>$REMOTECOPYLOG
+        # Si la copia es exitosa ($? == '0') y el valor de $BAND es OK, se escribe una entrada en el archivo de log $BACKUPLOG 
+        # indicando que la copia fue exitosa y se elimina el archivo copiado. 
+        if [[ $? == '0' ]] & [[ $BAND == 'OK' ]]; then
+            # ssh: El comando para iniciar una conexión SSH (Secure Shell) con un servidor remoto.
+            # -f $USER@${REMOTE_IP_DESTINO}: Conecta al servidor remoto utilizando el nombre de usuario $USER y la dirección IP ${REMOTE_IP_DESTINO}.
+            # -i ${KEY}: Especifica la clave privada ${KEY} para la autenticación.
+            # -q: Ejecuta SSH en modo silencioso, lo que reduce la salida en la terminal.
+            # -n: Evita la ejecución de un comando remoto.
+            # -o UserKnownHostsFile=/dev/null: Evita guardar la huella digital del servidor remoto en el archivo de hosts conocidos.
+            # -o StrictHostKeyChecking=no: Desactiva la verificación estricta de la clave del host, lo que permite conectarse a servidores desconocidos sin preguntar.
+            # -o BatchMode=yes: Habilita el modo por lotes, lo que evita la interacción con el usuario.
+            # -o PasswordAuthentication=no: Desactiva la autenticación mediante contraseña, requiriendo la autenticación con clave pública.
+            # if [[ -f ${RUTA_DIR_DESTINO}/$xFILE ]]; then chmod 666 ${RUTA_DIR_DESTINO}/$xFILE; fi
+            # Este script verifica si un archivo (${RUTA_DIR_DESTINO}/$xFILE) existe en el servidor remoto. Si el archivo existe, el script cambia los permisos del archivo a 666, lo que permite la lectura y escritura por parte del propietario, el grupo y otros usuarios.
+            ssh -f $USER@${REMOTE_IP_DESTINO} -i ${KEY} -q -n -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes -o PasswordAuthentication=no "if [[ -f ${RUTA_DIR_DESTINO}/$xFILE ]]; then chmod 666 ${RUTA_DIR_DESTINO}/$xFILE; fi"
+            echo "$COPY,$DATE,${xFILE},${REMOTE_IP_DESTINO},$STATUS" >> $BACKUPLOG
+            _remove_file $xFILE
+        elif [[ $? != '0' ]] & [[ $BAND == 'OK' ]]; then
+        # Si la copia falla y el valor de $BAND es OK, se escribe una entrada en el archivo de log $BACKUPLOG indicando que la copia falló.
+              echo "$COPY,$DATE,${xFILE},$REMOTE,FAILED" >> $BACKUPLOG
+        elif [[ $? == '0' ]] & [[ $BAND == 'FAILED' ]]; then
+        # Si la copia falla y el valor de $BAND es FAILED, se modifica la entrada correspondiente en el archivo de log $BACKUPLOG 
+        # para indicar que la copia fue exitosa y se elimina el archivo copiado.
+              ssh -f $USER@${REMOTE_IP_DESTINO} -i ${KEY} -q -n -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o BatchMode=yes -o PasswordAuthentication=no "if [[ -f ${RUTA_DIR_DESTINO}/$xFILE ]]; then chmod 666 ${RUTA_DIR_DESTINO}/$xFILE; fi"
+              sed "/${XFILE}/s/FAILED/$STATUS/g" $BACKUPLOG > $BACKUPLOG.tmp
+              sed "/${XFILE}/ s/$/${DATE}/" $BACKUPLOG.tmp > output_file
+              rm $BACKUPLOG.tmp
+              mv output_file $BACKUPLOG
+              _remove_file $xFILE
+        else
+        # Si la copia falla por algún otro motivo, se indica que se debe mandar un correo.
+            echo "Mandar correo"
+        fi
+}
+
+# La función _set_copy() se encarga de leer los archivos de registro y determinar qué archivos aún no se han copiado al servidor remoto.
+# Luego se realiza la copia mediante la función _copy_remote().
+_set_copy(){
+# Se define una variable ROUTE que apunta a la ruta de la carpeta local de origen 
+# (definida en la variable RUTA_DIR_ORIGEN). Luego, se cambia el directorio de trabajo a la ruta de origen con cd $ROUTE.
+ROUTE="${RUTA_DIR_ORIGEN}"
+cd $ROUTE
+# A continuación, se llama a la función _get_data() para obtener una lista de archivos que se van a copiar, y se guarda la lista en la variable LOGTMP.
+LOGTMP=$(_get_data)
+# Luego, se realiza un ciclo while para leer cada archivo en la lista LOGTMP. Se inicializa la variable FAILED en "OK".
+while read xFILE; do
+FAILED="OK"
+        if [[ -f $BACKUPLOG ]]; then
+            # Se verifica si el archivo ya ha sido copiado previamente (es decir, si ya se encuentra en el archivo de registro de copias, $BACKUPLOG). 
+            # Si es así, se obtiene el estado de la copia anterior (exitosa o fallida) y se guarda en la variable FAILED. 
+            valorx=$(grep ${xFILE} $BACKUPLOG)
+            if [[ $valorx != "" ]]; then
+                FAILED=$(echo $valorx|cut -d "," -f 5)
+                  if [[ $FAILED == "FAILED" ]]; then
+                  # Si la copia anterior falló, se llama a la función _copy_remote() para volver a intentar la copia.
+                    _copy_remote $xFILE $FAILED
+                  fi
+            else
+                  # Si el archivo no ha sido copiado previamente
+                  _copy_remote $xFILE $FAILED
+            fi
+        else
+          _create_logs
+          _copy_remote $xFILE $FAILED
+        fi
+done < $LOGTMP
+_remove_file $LOGTMP
+}
+
+# La función _remove_file() se utiliza para eliminar el archivo temporal generado por la función _generate_file_random().
+_remove_file(){
+  rFILE=$1
+  rm $rFILE
+}
+_set_copy

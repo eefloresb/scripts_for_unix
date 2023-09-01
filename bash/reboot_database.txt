@@ -1,0 +1,75 @@
+check_reboot.sh
+[root@C4QRNOD2DB scripts]# bash check_reboot.sh 
+grep: /var/log/syslog: No such file or directory
+grep: /var/log/apcupsd*: No such file or directory
+grep: /var/log/history: No such file or directory
+Output from 'last':
+reboot   system boot  4.18.0-425.19.2. Thu May 11 01:04:33 2023   still running
+shutdown system down  4.18.0-425.19.2. Thu May 11 01:04:22 2023 - Thu May 11 01:04:33 2023  (00:00)
+
+wtmp begins Thu Apr 13 16:09:01 2023
+
+Output from 'ausearch':
+----
+type=SYSTEM_SHUTDOWN msg=audit(05/11/2023 01:04:22.740:3823) : pid=722669 uid=root auid=unset ses=unset msg=' comm=systemd-update-utmp exe=/usr/lib/systemd/systemd-update-utmp hostname=? addr=? terminal=? res=success' 
+----
+type=SYSTEM_BOOT msg=audit(05/11/2023 01:04:34.779:9) : pid=1249 uid=root auid=unset ses=unset msg=' comm=systemd-update-utmp exe=/usr/lib/systemd/systemd-update-utmp hostname=? addr=? terminal=? res=success' 
+
+Output from 'grep' on /var/log/messages, /var/log/syslog, and /var/log/apcupsd*:
+/var/log/messages:May  7 03:43:02 C4QRNOD2DB rsyslogd[1415]: [origin software="rsyslogd" swVersion="8.2102.0-10.el8" x-pid="1415" x-info="https://www.rsyslog.com"] rsyslogd was HUPed
+/var/log/messages:May  7 08:42:05 C4QRNOD2DB systemd[2597]: Reached target Shutdown.
+/var/log/messages:May  8 21:59:03 C4QRNOD2DB systemd[80906]: Reached target Shutdown.
+/var/log/messages:May  9 15:23:15 C4QRNOD2DB systemd[109083]: Reached target Shutdown.
+/var/log/messages:May  9 16:16:37 C4QRNOD2DB systemd[118051]: Reached target Shutdown.
+/var/log/messages:May  9 16:18:53 C4QRNOD2DB systemd[118322]: Reached target Shutdown.
+/var/log/messages:May  9 16:19:07 C4QRNOD2DB systemd[118426]: Reached target Shutdown.
+/var/log/messages:May  9 16:25:08 C4QRNOD2DB sssd_kcm[118255]: Shutting down (status = 0)
+/var/log/messages:May  9 18:46:28 C4QRNOD2DB systemd[124142]: Reached target Shutdown.
+/var/log/messages:May  9 18:46:41 C4QRNOD2DB systemd[124258]: Reached target Shutdown.
+/var/log/messages:May  9 18:49:50 C4QRNOD2DB systemd[124430]: Reached target Shutdown.
+/var/log/messages:May  9 18:59:01 C4QRNOD2DB sssd_kcm[124336]: Shutting down (status = 0)
+/var/log/messages:May 10 13:22:41 C4QRNOD2DB systemd[289772]: Reached target Shutdown.
+/var/log/messages:May 10 13:23:10 C4QRNOD2DB systemd[290130]: Reached target Shutdown.
+/var/log/messages:May 10 21:57:12 C4QRNOD2DB systemd[338318]: Reached target Shutdown.
+/var/log/messages:May 10 22:48:59 C4QRNOD2DB systemd[343292]: Reached target Shutdown.
+/var/log/messages:May 11 00:01:18 C4QRNOD2DB systemd[350093]: Reached target Shutdown.
+/var/log/messages:May 11 00:37:31 C4QRNOD2DB systemd[437482]: Reached target Shutdown.
+/var/log/messages:May 11 01:03:18 C4QRNOD2DB systemd[721843]: Reached target Shutdown.
+/var/log/messages:May 11 01:03:59 C4QRNOD2DB systemd[722156]: Reached target Shutdown.
+/var/log/messages:May 11 01:04:33 C4QRNOD2DB systemd[1]: Started Cleaning Up and Shutting Down Daemons.
+/var/log/messages:May 11 01:04:34 C4QRNOD2DB systemd[1]: Started Update UTMP about System Boot/Shutdown.
+/var/log/messages:May 11 01:04:34 C4QRNOD2DB systemd[1]: Started Restore /run/initramfs on shutdown.
+/var/log/messages:May 11 01:04:34 C4QRNOD2DB systemd[1]: Started Logout off all iSCSI sessions on shutdown.
+/var/log/messages:May 11 01:04:35 C4QRNOD2DB rsyslogd[1403]: [origin software="rsyslogd" swVersion="8.2102.0-10.el8" x-pid="1403" x-info="https://www.rsyslog.com"] start
+/var/log/messages:May 11 01:04:35 C4QRNOD2DB systemd[1]: Started Xinetd A Powerful Replacement For Inetd.
+/var/log/messages:May 11 01:04:35 C4QRNOD2DB rsyslogd[1403]: imjournal: journal files changed, reloading...  [v8.2102.0-10.el8 try https://www.rsyslog.com/e/0 ]
+/var/log/messages:May 11 01:04:37 C4QRNOD2DB systemd[1]: Started Daemon for power management.
+/var/log/messages:May 11 01:04:39 C4QRNOD2DB dracut[2209]: *** Including module: shutdown ***
+/var/log/messages:May 11 01:05:37 C4QRNOD2DB journal[3865]: Service not used for 60 seconds. Shutting down..
+/var/log/messages:May 11 01:06:32 C4QRNOD2DB systemd[7713]: Reached target Shutdown.
+
+Output from 'last -x':
+gmdadmin pts/1        10.250.16.33     Tue May  9 11:11 - 15:23  (04:11)
+root     pts/1        10.250.16.33     Tue May  9 17:48 - 04:03  (10:14)
+root     pts/0        10.250.16.33     Wed May 10 12:45 - 22:41  (09:56)
+root     pts/1        10.250.16.33     Wed May 10 20:44 - 22:59  (02:14)
+root     pts/2        10.250.16.33     Wed May 10 21:11 - 01:04  (03:52)
+shutdown system down  4.18.0-425.19.2. Thu May 11 01:04 - 01:04  (00:00)
+reboot   system boot  4.18.0-425.19.2. Thu May 11 01:04   still running
+runlevel (to lvl 5)   4.18.0-425.19.2. Thu May 11 01:04   still running
+root     pts/0        10.250.16.33     Thu May 11 01:04   still logged in
+root     pts/1        10.250.16.33     Thu May 11 01:22   still logged in
+
+Output from 'grep' for reboot or shutdown:
+check_reboot.sh:last_output=$(last -Fxn2 shutdown reboot)
+check_reboot.sh:ausearch_output=$(ausearch -i -m system_boot,system_shutdown | tail -4)
+check_reboot.sh:grep_reboot=$(grep -REi "(reboot|shutdown)")
+check_reboot.sh:grep_history=$(grep -E "(reboot|shutdown)" /var/log/history)
+check_reboot.sh:echo "Output from 'grep' for reboot or shutdown:"
+check_reboot.sh:echo "$grep_reboot"
+check_reboot.sh:user=$(echo "$last_output$ausearch_output$grep_output$lastx_output$grep_reboot$grep_history" | grep -oP '(?<=user ).*(?= logged in)' | uniq)
+
+Output from 'grep' on /var/log/history:
+
+
+El usuario que pudo haber reiniciado el servidor es: ).*(?=

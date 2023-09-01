@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+#
+# Author: Edwin Enrique Flores Bautista
+# Email: eflores@canvia.com
+
+# Genera un reporte de si los archivos dentro del grub están presentes
+# Desarrollado en base a un inconveniente presentado por un cliente
+# que borro los archivos de dicho directorio
+
+__check_file_boot(){
+    if [[ -d /boot/grub2 ]]; then 
+        cd /boot/grub2
+        find . -name "*" -type f 
+        if [[ -d /boot/efi ]]; then 
+            cd /boot/efi 
+            find . -name "*" -type f 
+        fi
+    elif [[ -d /boot/grub ]]; then
+        cd /boot/
+        find . -name "*" -type f 
+    else
+        echo "The boot is delete, check with the administrator it..."
+        exit 0 
+    fi
+}

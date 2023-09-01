@@ -1,0 +1,18 @@
+[
+    {
+        "nodename": "192.168.101.10:32769",
+        "hostname": "192.168.101.10:32769",
+        "username": "root",
+        "ssh-password-storage-path": "keys/32769",
+        "ssh-authentication": "password",
+        "os": "linux-ubuntu"
+    },
+    {
+        "nodename": "192.168.101.12",
+        "hostname": "192.168.101.12",
+        "username": "root",
+        "ssh-password-storage-path": "keys/pc1",
+        "ssh-authentication": "password",
+        "os": "linux-ubuntu"
+    }
+]⏎

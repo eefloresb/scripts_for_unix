@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+    rundeck:
+        image: ${RUNDECK_IMAGE:-rundeck/rundeck:SNAPSHOT}
+        links:
+          - postgres
+        environment:
+            RUNDECK_DATABASE_DRIVER: org.postgresql.Driver
+            RUNDECK_DATABASE_USERNAME: rundeck
+            RUNDECK_DATABASE_PASSWORD: rundeck
+            RUNDECK_DATABASE_URL: jdbc:postgresql://postgres/rundeck?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
+            RUNDECK_GRAILS_URL: localhost:4440
+            RUNDECK_SERVER_FORWARDED: "true"
+            RUNDECK_SECURITY_HTTPHEADERS_PROVIDER_CSP_ENABLED: "false"
+        volumes:
+          - ${RUNDECK_LICENSE_FILE:-/dev/null}:/home/rundeck/etc/rundeckpro-license.key
+        ports:
+          - 4440:4440
+    postgres:
+        image: postgres
+        expose:
+          - 5432
+        environment:
+          - POSTGRES_DB=rundeck
+          - POSTGRES_USER=rundeck
+          - POSTGRES_PASSWORD=rundeck
+        volumes:
+          - dbdata:/var/lib/postgresql/data
+    nginx:
+        image: nginx
+        links:
+          - rundeck
+        volumes:
+          - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        ports:
+          - 80:80
+volumes:
+    dbdata:
