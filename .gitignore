@@ -1,0 +1,56 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyc
+*.o
+*.a
+*.so
+*.exe
+*.dll
+*.class
+*.jar
+*.war
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Configuraciones de entorno/IDE / Secrets
+*.env
+.env*
+.idea/
+.vscode/
+.secret
+
+# Node modules (para proyectos de JavaScript)
+node_modules/
+
+# Directorios de construcción
+/build
+/dist
+/out
+
+# Dependencias (para proyectos que usen, por ejemplo, pipenv o bundler)
+Pipfile.lock
+Gemfile.lock
+
+# System files
+.swap
+.swp
+.swo
+
+# Credenciales
+*.pem
+*.key
+*.cert
+*.crt
