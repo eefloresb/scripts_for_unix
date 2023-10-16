@@ -1,0 +1,89 @@
+version: '3.8'
+
+networks:
+  br1:
+    external: true
+  nextcloud_network:
+    driver: bridge
+
+volumes:
+  data_db:
+  data_redis:
+  nextcloud:
+  data_nextcloud:
+
+services:
+
+  mariadb:
+    image: mariadb:10.6
+    container_name: MariaDBNC
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    volumes:
+      - data_db:/var/lib/mysql
+    environment:
+      - TZ=America/Lima
+      - MYSQL_ROOT_PASSWORD=nextcloud
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MARIADB_AUTO_UPGRADE=1
+      - MARIADB_DISABLE_UPGRADE_BACKUP=1
+    networks:
+      - nextcloud_network
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  redis:
+    image: redis:alpine
+    container_name: RedisNC
+    restart: unless-stopped
+    command: redis-server --requirepass nextcloud
+    volumes:
+      - data_redis:/data
+    environment:
+      - TZ=America/Lima
+      - PUID=1000
+      - PGID=100
+    networks:
+      - nextcloud_network
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  nextcloud:
+    image: nextcloud:fpm-alpine
+    container_name: Nextcloud
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+      - data_nextcloud:/var/www/html/data
+      - type: tmpfs
+        target: /tmp
+        tmpfs:
+          size: 1000000000
+    environment:
+      - TZ=America/Lima
+      - PUID=1000
+      - PGID=100
+      - UMASK=022
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=mariadb
+      - REDIS_HOST=redis
+      - REDIS_HOST_PASSWORD=nextcloud
+    networks:
+      - nextcloud_network
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  web:
+    build: ./web
+    container_name: nginx-fpm
+    restart: always
+    networks:
+      - nextcloud_network
+    ports:
+      - "8080:80"
+    volumes:
+      - nextcloud:/var/www/html,ro
