@@ -1,0 +1,10 @@
+[Unit]
+Description=Se ejecuta al encender el sistema
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/scripts/daemon_check.sh
+
+[Install]
+WantedBy=default.target
