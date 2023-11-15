@@ -1,6 +1,6 @@
 ### Public Notice:
 
-End of Support for Project [ansible](https://github.com/eefloresb/scripts_for_unix)
+End of Support for Project [scripts_for_unix](https://github.com/eefloresb/scripts_for_unix)
 
 **Date:** 14/11/23
 
@@ -12,7 +12,7 @@ This decision is part of our ongoing commitment to streamline and enhance our pr
 
 Here are some key points to note:
 
-End of Support: We will no longer provide updates, bug fixes, or support for [ansible](https://github.com/eefloresb/scripts_for_unix).
+End of Support: We will no longer provide updates, bug fixes, or support for [scripts_for_unix](https://github.com/eefloresb/scripts_for_unix).
 
 New Repository: The new home for ongoing development and support is [New Repository Link](https://github.com/eefloresb/scripts). Please make sure to follow and contribute to the new repository.
 
