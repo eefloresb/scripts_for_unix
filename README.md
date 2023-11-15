@@ -14,7 +14,7 @@ Here are some key points to note:
 
 **End of Support**: We will no longer provide updates, bug fixes, or support for [scripts_for_unix](https://github.com/eefloresb/scripts_for_unix).
 
-__New Repository:__ The new home for ongoing development and support is [New Repository Link](https://github.com/eefloresb/scripts). Please make sure to follow and contribute to the new repository.
+__New Repository:__ The new home for ongoing development and support is [New Repository Link](https://github.com/2000923/scripts). Please make sure to follow and contribute to the new repository.
 
 Archived Status: [scripts_for_unix](https://github.com/eefloresb/scripts_for_unix) will be archived and maintained for reference purposes, but no further updates will be released here.
 
