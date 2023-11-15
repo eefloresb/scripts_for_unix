@@ -6,7 +6,7 @@ End of Support for Project [scripts_for_unix](https://github.com/eefloresb/scrip
 
 Dear Community,
 
-We want to inform you that support for [scripts_for_linux](https://github.com/eefloresb/scripts_for_unix) has officially concluded. Going forward, all updates, improvements, and related activities will be carried out in the new repository, which can be found at [New Repository Link](https://github.com/2000923/scripts).
+We want to inform you that support for scripts_for_linux has officially concluded. Going forward, all updates, improvements, and related activities will be carried out in the new repository, which can be found at new repository.
 
 This decision is part of our ongoing commitment to streamline and enhance our projects. We encourage all users and contributors to transition to the new repository to ensure access to the latest features and support.
 
