@@ -16,7 +16,7 @@ End of Support: We will no longer provide updates, bug fixes, or support for [an
 
 New Repository: The new home for ongoing development and support is [New Repository Link](https://github.com/eefloresb/scripts). Please make sure to follow and contribute to the new repository.
 
-Archived Status: [ansible](https://github.com/eefloresb/scripts_for_unix) will be archived and maintained for reference purposes, but no further updates will be released here.
+Archived Status: [scripts_for_unix](https://github.com/eefloresb/scripts_for_unix) will be archived and maintained for reference purposes, but no further updates will be released here.
 
 We appreciate your understanding and look forward to your continued engagement with our projects. If you have any questions or concerns, please reach out to us at
 <br /><br />
