@@ -1,7 +1,6 @@
 ### Public Notice:
 
-End of Support for Project [scripts_for_unix](https://github.com/eefloresb/scripts_for_unix)
-
+End of Support for Project scripts_for_unix
 **Date:** 14/11/23
 
 Dear Community,
